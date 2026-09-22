@@ -10,8 +10,8 @@ import {
   EyeOff,
   UserRound,
 } from 'lucide-react'
-import { supabase } from '../lib/supabase'
-import { isValidEmail, normalizeEmail } from '../lib/validation'
+import { supabase } from '../../lib/supabase'
+import { isValidEmail, normalizeEmail } from '../../lib/validation'
 import './Register.css'
 
 type UserType = 'candidate' | 'contractor'
@@ -34,14 +34,43 @@ export default function Register() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
 
-  async function handleRegister(event: FormEvent<HTMLFormElement>) {
+  async function handleRegister(
+    event: FormEvent<HTMLFormElement>,
+  ) {
     event.preventDefault()
 
     setError('')
     setSuccess(false)
 
+    // =========================================================
+    // VALIDAÇÕES
+    // =========================================================
+
+    const trimmedName = fullName.trim()
+    const trimmedPhone = phone.trim()
+    const normalizedEmail = normalizeEmail(email)
+
+    if (!trimmedName) {
+      setError('Digite seu nome completo.')
+      return
+    }
+
+    if (trimmedName.length < 3) {
+      setError('Digite seu nome completo corretamente.')
+      return
+    }
+
+    if (!isValidEmail(normalizedEmail)) {
+      setError(
+        'Digite um e-mail válido, como nome@exemplo.com.',
+      )
+      return
+    }
+
     if (password.length < 6) {
-      setError('A senha precisa ter pelo menos 6 caracteres.')
+      setError(
+        'A senha precisa ter pelo menos 6 caracteres.',
+      )
       return
     }
 
@@ -50,74 +79,141 @@ export default function Register() {
       return
     }
 
-    if (!fullName.trim()) {
-      setError('Digite seu nome completo.')
-      return
-    }
-
-    const normalizedEmail = normalizeEmail(email)
-
-    if (!isValidEmail(normalizedEmail)) {
-      setError('Digite um e-mail válido, como nome@exemplo.com.')
-      return
-    }
-
     setLoading(true)
 
-    const { data, error: signUpError } =
-      await supabase.auth.signUp({
-        email: normalizedEmail,
-        password,
-        options: {
-        data: {
-            full_name: fullName.trim(),
-            phone: phone.trim(),
-            role: userType,
-        },
-        },
+    try {
+      // =======================================================
+      // CRIA USUÁRIO NO SUPABASE AUTH
+      // =======================================================
+
+      const { data, error: signUpError } =
+        await supabase.auth.signUp({
+          email: normalizedEmail,
+          password,
+          options: {
+            data: {
+              full_name: trimmedName,
+              phone: trimmedPhone,
+              role: userType,
+            },
+          },
+        })
+
+      // =======================================================
+      // LOG PARA DEBUG
+      // =======================================================
+
+      console.log('HOUK — resultado do cadastro:', {
+        data,
+        error: signUpError,
+        userType,
       })
 
-    if (signUpError) {
-      console.error(signUpError)
+      // =======================================================
+      // ERRO DO SUPABASE
+      // =======================================================
 
-      if (
-        signUpError.message.toLowerCase().includes('already registered')
-      ) {
-        setError('Este e-mail já está cadastrado.')
-      } else if (signUpError.message.toLowerCase().includes('email')) {
-        setError('Não foi possível validar o e-mail. Apague o campo e digite-o novamente.')
+      if (signUpError) {
+        console.error(
+          'HOUK — erro completo do Supabase:',
+          signUpError,
+        )
+
+        const message = signUpError.message.toLowerCase()
+
+        if (
+          message.includes('already registered') ||
+          message.includes('user already registered')
+        ) {
+          setError(
+            'Este e-mail já está cadastrado. Tente entrar ou use outro e-mail.',
+          )
+        } else if (
+          message.includes(
+            'database error saving new user',
+          )
+        ) {
+          setError(
+            `O banco rejeitou o cadastro.\n\nErro retornado pelo Supabase: ${signUpError.message}`,
+          )
+        } else if (
+          message.includes('invalid email')
+        ) {
+          setError(
+            'O e-mail informado não é válido.',
+          )
+        } else if (
+          message.includes('password')
+        ) {
+          setError(
+            `Problema com a senha: ${signUpError.message}`,
+          )
+        } else {
+          setError(
+            `Não foi possível criar a conta.\n\n${signUpError.message}`,
+          )
+        }
+
+        setLoading(false)
+        return
+      }
+
+      // =======================================================
+      // SUPABASE NÃO RETORNOU USUÁRIO
+      // =======================================================
+
+      if (!data.user) {
+        console.error(
+          'HOUK — Supabase não retornou data.user:',
+          data,
+        )
+
+        setError(
+          'O cadastro não foi concluído porque o Supabase não retornou o usuário criado.',
+        )
+
+        setLoading(false)
+        return
+      }
+
+      // =======================================================
+      // SUCESSO
+      // =======================================================
+
+      console.log(
+        'HOUK — usuário criado com sucesso:',
+        data.user.id,
+      )
+
+      setSuccess(true)
+      setLoading(false)
+
+    } catch (caughtError) {
+      console.error(
+        'HOUK — erro inesperado no cadastro:',
+        caughtError,
+      )
+
+      if (caughtError instanceof Error) {
+        setError(
+          `Erro inesperado ao criar a conta: ${caughtError.message}`,
+        )
       } else {
-        setError('Não foi possível criar a conta agora. Tente novamente em instantes.')
+        setError(
+          'Não foi possível conectar ao serviço de cadastro. Verifique sua conexão e tente novamente.',
+        )
       }
 
       setLoading(false)
-      return
     }
-
-    if (!data.user) {
-      setError('Não foi possível criar sua conta.')
-      setLoading(false)
-      return
-    }
-
-    /*
-      O trigger do Supabase cria o perfil automaticamente
-      com role = candidate.
-
-      Para contratantes, a role será ajustada posteriormente
-      através de um fluxo administrativo seguro.
-    */
-
-    setSuccess(true)
-    setLoading(false)
   }
 
   return (
     <main className="register-page">
 
-      {/* =========================================
+      {/* =====================================================
           LADO ESQUERDO
-      ========================================== */}
+      ====================================================== */}
 
       <section className="register-showcase">
 
@@ -151,7 +247,7 @@ export default function Register() {
           <div className="register-presentation">
 
             <span className="register-label">
-              COMEÇE SUA JORNADA
+              COMECE SUA JORNADA
             </span>
 
             <h1>
@@ -209,9 +305,9 @@ export default function Register() {
 
       </section>
 
-      {/* =========================================
+      {/* =====================================================
           FORMULÁRIO
-      ========================================== */}
+      ====================================================== */}
 
       <section className="register-section">
 
@@ -243,9 +339,9 @@ export default function Register() {
 
           </div>
 
-          {/* =====================================
+          {/* =================================================
               TIPO DE CONTA
-          ====================================== */}
+          ================================================== */}
 
           <div className="account-type">
 
@@ -262,7 +358,10 @@ export default function Register() {
                     ? 'active'
                     : ''
                 }`}
-                onClick={() => setUserType('candidate')}
+                onClick={() =>
+                  setUserType('candidate')
+                }
+                disabled={loading}
               >
 
                 <div className="account-option-icon">
@@ -294,7 +393,10 @@ export default function Register() {
                     ? 'active'
                     : ''
                 }`}
-                onClick={() => setUserType('contractor')}
+                onClick={() =>
+                  setUserType('contractor')
+                }
+                disabled={loading}
               >
 
                 <div className="account-option-icon">
@@ -323,9 +425,9 @@ export default function Register() {
 
           </div>
 
-          {/* =====================================
+          {/* =================================================
               FORMULÁRIO
-          ====================================== */}
+          ================================================== */}
 
           <form
             className="register-form"
@@ -350,6 +452,7 @@ export default function Register() {
                   placeholder="Seu nome completo"
                   autoComplete="name"
                   required
+                  disabled={loading}
                 />
 
               </div>
@@ -369,6 +472,7 @@ export default function Register() {
                   }
                   placeholder="(15) 99999-9999"
                   autoComplete="tel"
+                  disabled={loading}
                 />
 
               </div>
@@ -388,10 +492,13 @@ export default function Register() {
                 onChange={(event) =>
                   setEmail(event.target.value)
                 }
-                onBlur={() => setEmail(normalizeEmail(email))}
+                onBlur={() =>
+                  setEmail(normalizeEmail(email))
+                }
                 placeholder="seu@email.com"
                 autoComplete="email"
                 required
+                disabled={loading}
               />
 
             </div>
@@ -420,6 +527,7 @@ export default function Register() {
                     placeholder="Mínimo 6 caracteres"
                     autoComplete="new-password"
                     required
+                    disabled={loading}
                   />
 
                   <button
@@ -435,6 +543,7 @@ export default function Register() {
                         ? 'Ocultar senha'
                         : 'Mostrar senha'
                     }
+                    disabled={loading}
                   >
                     {showPassword ? (
                       <EyeOff size={17} />
@@ -471,6 +580,7 @@ export default function Register() {
                     placeholder="Repita sua senha"
                     autoComplete="new-password"
                     required
+                    disabled={loading}
                   />
 
                   <button
@@ -486,6 +596,7 @@ export default function Register() {
                         ? 'Ocultar senha'
                         : 'Mostrar senha'
                     }
+                    disabled={loading}
                   >
                     {showConfirmPassword ? (
                       <EyeOff size={17} />
@@ -500,19 +611,35 @@ export default function Register() {
 
             </div>
 
+            {/* =================================================
+                ERRO
+            ================================================== */}
+
             {error && (
-              <div className="register-error">
+              <div
+                className="register-error"
+                role="alert"
+              >
                 {error}
               </div>
             )}
 
+            {/* =================================================
+                SUCESSO
+            ================================================== */}
+
             {success && (
-              <div className="register-success">
+              <div
+                className="register-success"
+                role="status"
+              >
+
                 <div className="success-icon">
                   <Check size={16} />
                 </div>
 
                 <div>
+
                   <strong>
                     Conta criada com sucesso!
                   </strong>
@@ -522,9 +649,19 @@ export default function Register() {
                       ? 'Sua conta de profissional está pronta.'
                       : 'Sua conta de contratante foi criada.'}
                   </span>
+
+                  <span>
+                    {`E-mail: ${normalizeEmail(email)}`}
+                  </span>
+
                 </div>
+
               </div>
             )}
+
+            {/* =================================================
+                BOTÃO
+            ================================================== */}
 
             <button
               type="submit"
@@ -555,6 +692,7 @@ export default function Register() {
             <button
               type="button"
               onClick={() => navigate('/login')}
+              disabled={loading}
             >
               Entrar no HOUK
             </button>

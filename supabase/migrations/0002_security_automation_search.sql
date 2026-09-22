@@ -54,6 +54,7 @@ $$;
 
 -- Do not expose email and telephone numbers in public profile searches.
 drop policy if exists "public profiles are readable" on public.profiles;
+drop policy if exists "users read own profile" on public.profiles;
 create policy "users read own profile" on public.profiles for select using (auth.uid() = id);
 
 create or replace view public.public_profiles as
@@ -153,6 +154,6 @@ drop policy if exists "users delete own profile assets" on storage.objects;
 drop policy if exists "users manage own resumes" on storage.objects;
 create policy "public reads profile assets" on storage.objects for select using (bucket_id = 'profile-assets');
 create policy "users upload own profile assets" on storage.objects for insert with check (bucket_id = 'profile-assets' and (storage.foldername(name))[1] = auth.uid()::text);
-create policy "users update own profile assets" on storage.objects for update using (bucket_id = 'profile-assets' and owner_id = auth.uid()) with check (bucket_id = 'profile-assets' and owner_id = auth.uid());
-create policy "users delete own profile assets" on storage.objects for delete using (bucket_id = 'profile-assets' and owner_id = auth.uid());
-create policy "users manage own resumes" on storage.objects for all using (bucket_id = 'resumes' and owner_id = auth.uid()) with check (bucket_id = 'resumes' and owner_id = auth.uid());
+create policy "users update own profile assets" on storage.objects for update using (bucket_id = 'profile-assets' and owner_id = auth.uid()::text) with check (bucket_id = 'profile-assets' and owner_id = auth.uid()::text);
+create policy "users delete own profile assets" on storage.objects for delete using (bucket_id = 'profile-assets' and owner_id = auth.uid()::text);
+create policy "users manage own resumes" on storage.objects for all using (bucket_id = 'resumes' and owner_id = auth.uid()::text) with check (bucket_id = 'resumes' and owner_id = auth.uid()::text);

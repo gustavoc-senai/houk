@@ -1,18 +1,23 @@
+/* =========================================================
+   HOUK — REGISTER
+   ========================================================= */
+
 .register-page {
   min-height: 100vh;
   display: grid;
   grid-template-columns: 48% 52%;
   background: #f7f4ed;
+  overflow: hidden;
 }
 
-/* ==================================================
+/* =========================================================
    LADO ESQUERDO
-================================================== */
+   ========================================================= */
 
 .register-showcase {
   position: relative;
-  overflow: hidden;
   min-height: 100vh;
+  overflow: hidden;
 
   background: #183b56;
   color: #ffffff;
@@ -22,6 +27,7 @@
   position: absolute;
   inset: 0;
   overflow: hidden;
+  pointer-events: none;
 }
 
 .register-circle {
@@ -29,14 +35,16 @@
 
   border: 1px solid rgba(142, 197, 255, 0.16);
   border-radius: 50%;
+
+  pointer-events: none;
 }
 
 .register-circle-one {
   width: 620px;
   height: 620px;
 
-  right: -350px;
   top: -270px;
+  right: -350px;
 }
 
 .register-circle-two {
@@ -73,6 +81,12 @@
     black,
     transparent 75%
   );
+
+  -webkit-mask-image: linear-gradient(
+    to bottom right,
+    black,
+    transparent 75%
+  );
 }
 
 .register-showcase-content {
@@ -87,20 +101,21 @@
   padding: 42px 64px;
 }
 
-/* ==================================================
-   VOLTAR
-================================================== */
+/* =========================================================
+   BOTÃO VOLTAR
+   ========================================================= */
 
 .back-login {
   width: fit-content;
 
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
 
   padding: 0;
 
   border: 0;
+  outline: none;
 
   background: transparent;
 
@@ -109,16 +124,25 @@
   font-size: 12px;
   font-weight: 600;
 
-  transition: color 0.2s ease;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .back-login:hover {
   color: #8ec5ff;
+  transform: translateX(-2px);
 }
 
-/* ==================================================
+.back-login:focus-visible {
+  outline: 2px solid #8ec5ff;
+  outline-offset: 5px;
+  border-radius: 4px;
+}
+
+/* =========================================================
    MARCA
-================================================== */
+   ========================================================= */
 
 .register-brand {
   display: flex;
@@ -143,17 +167,21 @@
   align-items: center;
   justify-content: center;
 
+  flex-shrink: 0;
+
   border: 1.5px solid #8ec5ff;
   border-radius: 12px;
 
   color: #8ec5ff;
 
+  font-family: 'Manrope', sans-serif;
   font-size: 20px;
+  font-weight: 800;
 }
 
-/* ==================================================
+/* =========================================================
    APRESENTAÇÃO
-================================================== */
+   ========================================================= */
 
 .register-presentation {
   max-width: 520px;
@@ -176,6 +204,8 @@
 
 .register-presentation h1 {
   margin: 0;
+
+  color: #ffffff;
 
   font-family: 'Manrope', sans-serif;
 
@@ -206,9 +236,9 @@
   line-height: 1.75;
 }
 
-/* ==================================================
+/* =========================================================
    BENEFÍCIOS
-================================================== */
+   ========================================================= */
 
 .register-benefits {
   display: flex;
@@ -246,21 +276,23 @@
   color: rgba(255, 255, 255, 0.68);
 
   font-size: 12px;
+  line-height: 1.4;
 }
 
-/* ==================================================
+/* =========================================================
    RODAPÉ ESQUERDO
-================================================== */
+   ========================================================= */
 
 .register-showcase-footer {
   color: rgba(255, 255, 255, 0.35);
 
   font-size: 10px;
+  line-height: 1.5;
 }
 
-/* ==================================================
+/* =========================================================
    ÁREA DIREITA
-================================================== */
+   ========================================================= */
 
 .register-section {
   min-height: 100vh;
@@ -270,16 +302,20 @@
   justify-content: center;
 
   padding: 45px 50px;
+
+  overflow-y: auto;
 }
 
 .register-container {
   width: 100%;
   max-width: 570px;
+
+  margin: auto;
 }
 
-/* ==================================================
+/* =========================================================
    CABEÇALHO
-================================================== */
+   ========================================================= */
 
 .register-header {
   margin-bottom: 28px;
@@ -308,6 +344,8 @@
   font-size: 34px;
   line-height: 1.15;
 
+  font-weight: 800;
+
   letter-spacing: -1.3px;
 }
 
@@ -317,11 +355,12 @@
   color: #687582;
 
   font-size: 13px;
+  line-height: 1.5;
 }
 
-/* ==================================================
+/* =========================================================
    TIPO DE CONTA
-================================================== */
+   ========================================================= */
 
 .account-type {
   margin-bottom: 23px;
@@ -366,16 +405,28 @@
 
   text-align: left;
 
+  outline: none;
+
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease,
-    transform 0.2s ease;
+    transform 0.2s ease,
+    background 0.2s ease;
 }
 
-.account-option:hover {
+.account-option:hover:not(:disabled) {
   border-color: #b9d9f7;
 
   transform: translateY(-1px);
+
+  box-shadow: 0 5px 15px rgba(24, 59, 86, 0.05);
+}
+
+.account-option:focus-visible {
+  border-color: #8ec5ff;
+
+  box-shadow:
+    0 0 0 3px rgba(142, 197, 255, 0.18);
 }
 
 .account-option.active {
@@ -385,6 +436,16 @@
 
   box-shadow:
     0 0 0 3px rgba(142, 197, 255, 0.12);
+}
+
+.account-option:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.account-option:disabled:hover {
+  transform: none;
+  box-shadow: none;
 }
 
 .account-option-icon {
@@ -402,10 +463,20 @@
   background: #dceeff;
 
   color: #183b56;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.account-option.active .account-option-icon {
+  background: #8ec5ff;
+  color: #183b56;
 }
 
 .account-option-text {
   min-width: 0;
+  padding-right: 18px;
 }
 
 .account-option-text strong {
@@ -425,6 +496,7 @@
   color: #687582;
 
   font-size: 10px;
+  line-height: 1.4;
 }
 
 .selected-check {
@@ -447,9 +519,9 @@
   color: #ffffff;
 }
 
-/* ==================================================
+/* =========================================================
    FORMULÁRIO
-================================================== */
+   ========================================================= */
 
 .register-form {
   display: flex;
@@ -466,6 +538,8 @@
 }
 
 .register-field {
+  min-width: 0;
+
   display: flex;
   flex-direction: column;
 
@@ -498,14 +572,15 @@
 
   transition:
     border-color 0.2s ease,
-    box-shadow 0.2s ease;
+    box-shadow 0.2s ease,
+    background 0.2s ease;
 }
 
 .register-field input::placeholder {
   color: #a4adb4;
 }
 
-.register-field input:hover {
+.register-field input:hover:not(:disabled) {
   border-color: #c7d1d8;
 }
 
@@ -516,22 +591,33 @@
     0 0 0 4px rgba(142, 197, 255, 0.16);
 }
 
-/* ==================================================
+.register-field input:disabled {
+  cursor: not-allowed;
+
+  background: #f1f3f4;
+
+  color: #7c858c;
+
+  opacity: 0.75;
+}
+
+/* =========================================================
    SENHA
-================================================== */
+   ========================================================= */
 
 .register-password {
   position: relative;
+  width: 100%;
 }
 
 .register-password input {
-  padding-right: 45px;
+  padding-right: 48px;
 }
 
 .register-password-toggle {
   position: absolute;
 
-  right: 11px;
+  right: 9px;
   top: 50%;
 
   width: 30px;
@@ -543,44 +629,91 @@
 
   transform: translateY(-50%);
 
+  padding: 0;
+
   border: 0;
+  border-radius: 6px;
+
+  outline: none;
 
   background: transparent;
 
   color: #687582;
+
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
 }
 
-.register-password-toggle:hover {
+.register-password-toggle:hover:not(:disabled) {
   color: #183b56;
+  background: #f1f5f8;
 }
 
-/* ==================================================
-   ERROS
-================================================== */
+.register-password-toggle:focus-visible {
+  color: #183b56;
+
+  box-shadow:
+    0 0 0 2px rgba(142, 197, 255, 0.3);
+}
+
+.register-password-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* =========================================================
+   MENSAGEM DE ERRO
+   ========================================================= */
 
 .register-error {
-  padding: 11px 13px;
+  width: 100%;
+
+  padding: 13px 15px;
 
   border: 1px solid #e7bfc0;
-  border-radius: 8px;
+  border-radius: 9px;
 
   background: #f5dddd;
 
   color: #873638;
 
   font-size: 11px;
-  line-height: 1.5;
+  line-height: 1.6;
+
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
+
+.register-error::before {
+  content: 'Atenção';
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #873638;
+
+  font-size: 10px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+/* =========================================================
+   MENSAGEM DE SUCESSO
+   ========================================================= */
 
 .register-success {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
 
-  padding: 11px 13px;
+  padding: 13px 15px;
 
   border: 1px solid #b9d8ca;
-  border-radius: 8px;
+  border-radius: 9px;
 
   background: #edf7f1;
 
@@ -588,14 +721,16 @@
 }
 
 .success-icon {
-  width: 25px;
-  height: 25px;
+  width: 27px;
+  height: 27px;
 
   flex-shrink: 0;
 
   display: flex;
   align-items: center;
   justify-content: center;
+
+  margin-top: 1px;
 
   border-radius: 50%;
 
@@ -607,20 +742,26 @@
 .register-success strong {
   display: block;
 
-  margin-bottom: 2px;
+  margin-bottom: 3px;
+
+  color: #326b55;
 
   font-size: 11px;
+  font-weight: 800;
 }
 
 .register-success span {
   display: block;
 
+  color: #4e7565;
+
   font-size: 10px;
+  line-height: 1.5;
 }
 
-/* ==================================================
-   BOTÃO
-================================================== */
+/* =========================================================
+   BOTÃO PRINCIPAL
+   ========================================================= */
 
 .register-button {
   width: 100%;
@@ -637,6 +778,8 @@
   border: 0;
   border-radius: 9px;
 
+  outline: none;
+
   background: #183b56;
 
   color: #ffffff;
@@ -647,7 +790,8 @@
   transition:
     background 0.2s ease,
     transform 0.2s ease,
-    box-shadow 0.2s ease;
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
 }
 
 .register-button:hover:not(:disabled) {
@@ -661,20 +805,35 @@
 
 .register-button:active:not(:disabled) {
   transform: translateY(0);
+
+  box-shadow:
+    0 5px 12px rgba(24, 59, 86, 0.12);
+}
+
+.register-button:focus-visible {
+  box-shadow:
+    0 0 0 4px rgba(142, 197, 255, 0.25);
 }
 
 .register-button:disabled {
   cursor: not-allowed;
+
   opacity: 0.65;
+
+  transform: none;
+
+  box-shadow: none;
 }
 
-/* ==================================================
+/* =========================================================
    LOGIN
-================================================== */
+   ========================================================= */
 
 .register-login {
   display: flex;
   justify-content: center;
+  align-items: center;
+
   gap: 5px;
 
   margin-top: 21px;
@@ -695,15 +854,29 @@
 
   font-size: 11px;
   font-weight: 800;
+
+  outline: none;
 }
 
-.register-login button:hover {
+.register-login button:hover:not(:disabled) {
   text-decoration: underline;
 }
 
-/* ==================================================
+.register-login button:focus-visible {
+  text-decoration: underline;
+
+  box-shadow:
+    0 2px 0 #a64648;
+}
+
+.register-login button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* =========================================================
    TERMOS
-================================================== */
+   ========================================================= */
 
 .register-terms {
   max-width: 420px;
@@ -718,34 +891,75 @@
   text-align: center;
 }
 
-/* ==================================================
-   MOBILE
-================================================== */
+/* =========================================================
+   MARCA MOBILE
+   ========================================================= */
 
 .register-mobile-brand {
   display: none;
 }
 
-@media (max-width: 1000px) {
+/* =========================================================
+   TABLET / TELAS MÉDIAS
+   ========================================================= */
 
+@media (max-width: 1100px) {
   .register-page {
-    grid-template-columns: 43% 57%;
+    grid-template-columns: 44% 56%;
   }
 
   .register-showcase-content {
-    padding: 38px;
+    padding: 38px 42px;
   }
 
   .register-section {
-    padding: 38px;
+    padding: 38px 40px;
   }
 
+  .register-presentation h1 {
+    font-size: clamp(38px, 4vw, 52px);
+  }
 }
 
-@media (max-width: 800px) {
-
+@media (max-width: 950px) {
   .register-page {
-    grid-template-columns: 1fr;
+    grid-template-columns: 42% 58%;
+  }
+
+  .register-showcase-content {
+    padding: 34px;
+  }
+
+  .register-section {
+    padding: 34px;
+  }
+
+  .register-presentation h1 {
+    font-size: 43px;
+
+    letter-spacing: -2px;
+  }
+
+  .register-presentation > p {
+    font-size: 13px;
+  }
+
+  .register-container {
+    max-width: 540px;
+  }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 800px) {
+  .register-page {
+    min-height: 100vh;
+
+    display: block;
+
+    overflow: visible;
   }
 
   .register-showcase {
@@ -755,11 +969,20 @@
   .register-section {
     min-height: 100vh;
 
-    padding: 28px 22px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+
+    padding: 34px 24px;
+
+    overflow: visible;
   }
 
   .register-container {
-    max-width: 500px;
+    width: 100%;
+    max-width: 520px;
+
+    margin: 0 auto;
   }
 
   .register-mobile-brand {
@@ -775,6 +998,8 @@
 
     font-size: 23px;
     font-weight: 800;
+
+    letter-spacing: -0.7px;
   }
 
   .register-mobile-logo {
@@ -785,40 +1010,138 @@
     align-items: center;
     justify-content: center;
 
+    flex-shrink: 0;
+
     border: 1.5px solid #183b56;
     border-radius: 11px;
 
     color: #183b56;
 
+    font-family: 'Manrope', sans-serif;
     font-size: 18px;
+    font-weight: 800;
   }
 
   .register-header h2 {
     font-size: 30px;
   }
-
 }
 
-@media (max-width: 520px) {
+/* =========================================================
+   MOBILE PEQUENO
+   ========================================================= */
 
+@media (max-width: 560px) {
   .register-section {
-    padding: 25px 18px;
+    padding: 28px 20px;
+  }
+
+  .register-mobile-brand {
+    margin-bottom: 34px;
+  }
+
+  .register-header {
+    margin-bottom: 24px;
+  }
+
+  .register-header h2 {
+    font-size: 28px;
+
+    letter-spacing: -1px;
+  }
+
+  .register-header p {
+    font-size: 12px;
+  }
+
+  .account-type {
+    margin-bottom: 20px;
   }
 
   .account-options {
     grid-template-columns: 1fr;
+    gap: 9px;
+  }
+
+  .account-option {
+    min-height: 70px;
+  }
+
+  .register-form {
+    gap: 15px;
   }
 
   .form-row {
     grid-template-columns: 1fr;
+    gap: 15px;
   }
 
-  .register-header h2 {
-    font-size: 27px;
+  .register-field input {
+    height: 47px;
+  }
+
+  .register-button {
+    height: 50px;
+  }
+}
+
+/* =========================================================
+   CELULAR MUITO PEQUENO
+   ========================================================= */
+
+@media (max-width: 380px) {
+  .register-section {
+    padding: 24px 16px;
   }
 
   .register-mobile-brand {
-    margin-bottom: 36px;
+    margin-bottom: 30px;
+
+    font-size: 21px;
   }
 
+  .register-mobile-logo {
+    width: 37px;
+    height: 37px;
+
+    font-size: 17px;
+  }
+
+  .register-header h2 {
+    font-size: 25px;
+  }
+
+  .register-eyebrow {
+    font-size: 10px;
+  }
+
+  .account-option {
+    padding: 11px;
+  }
+
+  .account-option-icon {
+    width: 35px;
+    height: 35px;
+  }
+
+  .register-error,
+  .register-success {
+    padding: 11px 12px;
+  }
+}
+
+/* =========================================================
+   REDUÇÃO DE MOVIMENTO
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .register-page *,
+  .register-page *::before,
+  .register-page *::after {
+    scroll-behavior: auto !important;
+
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }
