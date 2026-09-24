@@ -46,6 +46,7 @@ type Profile = {
   email: string
   role: string
   city: string | null
+  headline?: string | null
   created_at: string
 }
 
@@ -293,6 +294,11 @@ const nav: Record<
       icon: BriefcaseBusiness,
     },
     {
+      page: 'create-opportunity',
+      label: 'Publicar oportunidade',
+      icon: ClipboardList,
+    },
+    {
       page: 'categories',
       label: 'Categorias',
       icon: SlidersHorizontal,
@@ -363,6 +369,7 @@ function List({
     name: string
     detail: string
     status: string
+    href?: string
   }>
 }) {
   return (
@@ -420,7 +427,17 @@ function List({
                   {row.status}
                 </Badge>
 
-                <ChevronRight size={17} />
+                {row.href ? (
+                  <Link
+                    className="icon-link"
+                    to={row.href}
+                    aria-label={`Abrir ${row.name}`}
+                  >
+                    <ChevronRight size={17} />
+                  </Link>
+                ) : (
+                  <ChevronRight size={17} />
+                )}
               </div>
             )
           })}
@@ -979,6 +996,7 @@ function AdminPage({
               : ''
           } · ${date(item.created_at)}`,
           status: item.status,
+          href: `/admin/opportunity-details?id=${item.id}`,
         }))}
       />
     )
@@ -1147,7 +1165,7 @@ function useWorkspaceData(
       } = await supabase
         .from('profiles')
         .select(
-          'id, full_name, email, role, city, created_at'
+          'id, full_name, email, role, city, headline, created_at'
         )
         .eq('id', auth.user.id)
         .single()
@@ -1678,6 +1696,9 @@ function StandardPage({
               item.created_at
             )}`,
             status: item.status,
+            href: isContractor
+              ? `/contratante/application-details?id=${item.id}`
+              : `/candidato/application-details?id=${item.id}`,
           })
         )}
       />
@@ -1814,27 +1835,97 @@ function StandardPage({
     )
   }
 
-  if (page === 'business') {
+  if (!isContractor && page === 'career') {
+    return (
+      <section className="workspace-card editor-card">
+        <span className="section-eyebrow">MINHA CARREIRA</span>
+        <h2>Construa um perfil completo</h2>
+        <p>
+          Mantenha suas informações atualizadas para aumentar
+          suas chances nas oportunidades.
+        </p>
+        <div className="career-links">
+          <Link to="/candidato/experience">Adicionar experiência</Link>
+          <Link to="/candidato/education">Adicionar formação</Link>
+          <Link to="/candidato/skills">Adicionar competência</Link>
+          <Link to="/candidato/portfolio">Adicionar projeto</Link>
+          <Link to="/candidato/resume">Atualizar currículo</Link>
+        </div>
+      </section>
+    )
+  }
+
+  if (!isContractor && page === 'achievements') {
+    const completed = [
+      data.profile?.headline,
+      data.profile?.city,
+      data.resumes.length,
+      data.skills.length,
+      data.experiences.length,
+      data.educations.length,
+    ].filter(Boolean).length
+    return (
+      <>
+        <section className="page-intro">
+          <div>
+            <span className="section-eyebrow">PROGRESSO</span>
+            <h2>Conquistas do perfil</h2>
+            <p>Seu perfil possui {completed} de 6 etapas principais completas.</p>
+          </div>
+        </section>
+        <div className="workspace-metrics">
+          <article className="workspace-metric"><span>Competências</span><strong>{data.skills.length}</strong><small>registradas no perfil</small></article>
+          <article className="workspace-metric"><span>Experiências</span><strong>{data.experiences.length}</strong><small>incluídas na carreira</small></article>
+          <article className="workspace-metric"><span>Candidaturas</span><strong>{data.applications.length}</strong><small>enviadas até agora</small></article>
+        </div>
+      </>
+    )
+  }
+
+  if (!isContractor && page === 'activity') {
     return (
       <List
-        heading="Minha empresa"
-        rows={data.businesses.map(
-          item => ({
-            name: item.name,
-            detail: `${
-              item.city ??
-              'Local não informado'
-            }${
-              item.state
-                ? `, ${item.state}`
-                : ''
-            }`,
-            status: item.verified_at
-              ? 'Verificada'
-              : 'Pendente',
-          })
-        )}
+        heading="Atividade recente"
+        rows={data.notifications.map(item => ({
+          name: item.title,
+          detail: item.body,
+          status: item.read_at ? 'Lida' : 'Nova',
+        }))}
       />
+    )
+  }
+
+  if (page === 'business') {
+    return (
+      <>
+        <section className="page-intro">
+          <div>
+            <span className="section-eyebrow">EMPRESA</span>
+            <h2>Minha empresa</h2>
+            <p>Gerencie os dados que acompanham suas oportunidades.</p>
+          </div>
+          <Link className="workspace-primary" to="/contratante/edit-business">Editar empresa</Link>
+        </section>
+        <List
+          heading="Minha empresa"
+          rows={data.businesses.map(
+            item => ({
+              name: item.name,
+              detail: `${
+                item.city ??
+                'Local não informado'
+              }${
+                item.state
+                  ? `, ${item.state}`
+                  : ''
+              }`,
+              status: item.verified_at
+                ? 'Verificada'
+                : 'Pendente',
+            })
+          )}
+        />
+      </>
     )
   }
 
@@ -1979,6 +2070,17 @@ function StandardPage({
               </strong>
             </div>
           </div>
+
+          {page === 'profile' && (
+            <div className="profile-card-action">
+              <Link
+                className="workspace-primary"
+                to={`${pathFor(role)}/edit-profile`}
+              >
+                Editar perfil
+              </Link>
+            </div>
+          )}
         </section>
       </>
     )
@@ -2010,20 +2112,21 @@ function StandardPage({
 export function WorkspacePage({
   role,
   page,
-}: Props) {
+  children,
+}: Props & { children?: ReactNode }) {
   return (
     <Shell
       role={role}
       page={page}
     >
-      {role === 'admin' ? (
+      {children ?? (role === 'admin' ? (
         <AdminPage page={page} />
       ) : (
         <StandardPage
           role={role}
           page={page}
         />
-      )}
+      ))}
     </Shell>
   )
 }
